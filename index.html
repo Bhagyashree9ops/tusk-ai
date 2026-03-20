@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TUSK.AI — Qualtrics Survey Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="pdf.min.js"></script>
+<style>
+/* ════════════════════════════════════════════════
+   TUSK.AI — Light theme, Qualtrics-inspired
+════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:        #f5f6fa;
+  --white:     #ffffff;
+  --border:    #e2e5ef;
+  --border2:   #d0d5e8;
+  --blue:      #0f4fd1;
+  --blue-lt:   #e8eefb;
+  --blue-md:   #c5d4f7;
+  --teal:      #00837a;
+  --teal-lt:   #e0f4f3;
+  --red:       #d93636;
+  --red-lt:    #fdeaea;
+  --amber:     #d97706;
+  --amber-lt:  #fef3e2;
+  --green:     #16a34a;
+  --green-lt:  #e8f5ee;
+  --text:      #1a1d2e;
+  --text2:     #4a5068;
+  --text3:     #8b92aa;
+  --shadow:    0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+  --radius:    10px;
+  --radius-s:  6px;
+  --sidebar:   220px;
+  --header:    56px;
+}
+
+html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg);}
+
+/* ── Layout ─────────────────────────────────── */
+.shell{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ── Top Bar ─────────────────────────────────── */
+.topbar{
+  height:var(--header);flex-shrink:0;
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  box-shadow:var(--shadow-sm);
+  z-index:100;
+}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.logo-sq{
+  width:32px;height:32px;
+  background:var(--blue);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:16px;color:#fff;
+  letter-spacing:-1px;flex-shrink:0;
+}
+.logo-name{font-weight:800;font-size:15px;color:var(--text);}
+.logo-name span{color:var(--blue);}
+.logo-tag{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-left:2px;}
+.topbar-user{display:flex;align-items:center;gap:10px;}
+.user-avatar{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--blue);color:#fff;
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.user-email{font-size:12px;color:var(--text2);}
+.btn-signout{
+  font-size:11px;color:var(--red);background:none;border:none;
+  cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;
+  padding:4px 8px;border-radius:var(--radius-s);
+  transition:background .15s;
+}
+.btn-signout:hover{background:var(--red-lt);}
+
+/* ── Main body ───────────────────────────────── */
+.body{display:flex;flex:1;overflow:hidden;}
+
+/* ── Sidebar ─────────────────────────────────── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--white);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:16px 10px;gap:2px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border-radius:var(--radius-s);
+  cursor:pointer;transition:all .15s;
+  font-size:13px;font-weight:500;color:var(--text2);
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--blue-lt);color:var(--blue);}
+.nav-item.active{background:var(--blue-lt);color:var(--blue);font-weight:600;}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+.nav-sep{height:1px;background:var(--border);margin:8px 4px;}
+
+.sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--border);}
+.version-tag{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-align:center;padding:4px;}
+
+/* ── Content area ─────────────────────────────── */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.page{display:none;flex:1;overflow-y:auto;padding:24px;}
+.page.active{display:flex;flex-direction:column;gap:20px;}
+
+/* ── Cards ───────────────────────────────────── */
+.card{
+  background:var(--white);border-radius:var(--radius);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+}
+.card-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{font-size:14px;font-weight:700;color:var(--text);}
+.card-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.card-body{padding:20px;}
+
+/* ── Page headers ────────────────────────────── */
+.page-header{margin-bottom:4px;}
+.page-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.page-desc{font-size:13px;color:var(--text2);margin-top:4px;}
+
+/* ══════════════════════════════════════════════
+   SETTINGS PAGE
+══════════════════════════════════════════════ */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.settings-grid{grid-template-columns:1fr;}}
+
+.field-group{display:flex;flex-direction:column;gap:5px;}
+.field-label{font-size:12px;font-weight:600;color:var(--text2);}
+.field-input{
+  width:100%;padding:9px 12px;
+  border:1.5px solid var(--border2);border-radius:var(--radius-s);
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--text);
+  background:var(--white);outline:none;transition:border-color .15s;
+}
+.field-input:focus{border-color:var(--blue);}
+.field-input::placeholder{color:var(--text3);}
+.field-hint{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+
+.api-status{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-radius:var(--radius-s);
+  font-size:12px;font-weight:500;margin-top:8px;
+}
+.api-status.ok    {background:var(--green-lt);color:var(--green);}
+.api-status.error {background:var(--red-lt);color:var(--red);}
+.api-status.idle  {background:var(--bg);color:var(--text3);}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.api-status.ok .status-dot    {background:var(--green);}
+.api-status.error .status-dot {background:var(--red);}
+.api-status.idle .status-dot  {background:var(--text3);}
+
+/* ══════════════════════════════════════════════
+   HOME PAGE — Upload & Generate
+══════════════════════════════════════════════ */
+.upload-area{
+  border:2px dashed var(--border2);
+  border-radius:var(--radius);
+  padding:40px 24px;text-align:center;
+  cursor:pointer;transition:all .2s;
+  background:var(--bg);
+}
+.upload-area:hover,.upload-area.dragging{
+  border-color:var(--blue);border-style:solid;
+  background:var(--blue-lt);
+}
+.upload-ico{font-size:36px;margin-bottom:12px;}
+.upload-h{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.upload-p{font-size:13px;color:var(--text2);}
+.upload-formats{
+  display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:14px;
+}
+.fmt-tag{
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:600;
+  padding:3px 8px;border-radius:20px;
+  background:var(--white);border:1px solid var(--border2);
+  color:var(--text2);
+}
+
+.file-attached{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  background:var(--green-lt);border:1px solid var(--green);
+  border-radius:var(--radius-s);
+}
+.file-attached-name{flex:1;font-size:13px;font-weight:600;color:var(--green);}
+.file-remove-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--text3);font-size:14px;
+  padding:2px 6px;border-radius:4px;transition:all .15s;
+}
+.file-remove-btn:hover{background:var(--red-lt);color:var(--red);}
+
+.paste-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.paste-area{
+  width:100%;height:160px;
+  border:1.5px solid var(--border2);border-radius:var(--radius-s);
+  padding:12px;font-family:'DM Mono',monospace;font-size:12px;
+  color:var(--text);background:var(--white);resize:vertical;
+  outline:none;line-height:1.7;transition:border-color .15s;
+}
+.paste-area:focus{border-color:var(--blue);}
+.paste-area::placeholder{color:var(--text3);}
+
+.gen-section{display:flex;flex-direction:column;gap:12px;}
+.options-row{display:flex;gap:10px;flex-wrap:wrap;}
+.opt-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:20px;
+  border:1.5px solid var(--border2);background:var(--white);
+  font-size:12px;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:all .15s;
+}
+.opt-chip input{display:none;}
+.opt-chip.selected{border-color:var(--blue);background:var(--blue-lt);color:var(--blue);}
+.opt-chip:hover{border-color:var(--blue);color:var(--blue);}
+
+/* Progress bar */
+.progress-wrap{margin-top:8px;}
+.progress-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;}
+.progress-bar{height:6px;background:var(--bg);border-radius:10px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--blue);border-radius:10px;transition:width .4s ease;width:0%;}
+
+/* ══════════════════════════════════════════════
+   SURVEY FLOW PAGE
+══════════════════════════════════════════════ */
+.flow-layout{display:grid;grid-template-columns:280px 1fr;gap:16px;height:100%;}
+@media(max-width:800px){.flow-layout{grid-template-columns:1fr;}}
+
+.flow-sidebar{display:flex;flex-direction:column;gap:8px;}
+.block-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-s);overflow:hidden;
+}
+.block-header{
+  padding:10px 14px;background:var(--blue);color:#fff;
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;
+}
+.block-header .q-count{
+  background:rgba(255,255,255,.25);
+  padding:1px 6px;border-radius:10px;font-size:10px;
+}
+.block-questions{padding:6px 0;}
+.q-row{
+  padding:6px 14px;display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:background .12s;font-size:12px;color:var(--text2);
+  border-left:3px solid transparent;
+}
+.q-row:hover{background:var(--blue-lt);color:var(--blue);}
+.q-row.active{background:var(--blue-lt);color:var(--blue);border-left-color:var(--blue);}
+.q-type-badge{
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:3px;flex-shrink:0;
+}
+.badge-MC{background:#e8eefb;color:#0f4fd1;}
+.badge-TE{background:#e0f4f3;color:#00837a;}
+.badge-Matrix{background:#fef3e2;color:#d97706;}
+.badge-Slider{background:#f3e8fb;color:#7c3aed;}
+.badge-RO{background:#fdeaea;color:#d93636;}
+.badge-DB{background:#f1f5f9;color:#64748b;}
+.badge-CS{background:#fef9e2;color:#b45309;}
+
+.flow-detail{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  overflow-y:auto;
+}
+.detail-empty{
+  height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:var(--text3);gap:8px;text-align:center;
+}
+.detail-empty-icon{font-size:40px;opacity:.4;}
+
+.detail-q-text{font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;line-height:1.4;}
+.detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.meta-chip{
+  font-size:11px;padding:3px 9px;border-radius:10px;
+  font-family:'DM Mono',monospace;
+}
+.meta-chip.type   {background:var(--blue-lt);color:var(--blue);}
+.meta-chip.req    {background:var(--red-lt);color:var(--red);}
+.meta-chip.opt    {background:var(--bg);color:var(--text3);}
+.meta-chip.logic  {background:var(--amber-lt);color:var(--amber);}
+.meta-chip.score  {background:var(--green-lt);color:var(--green);}
+
+.detail-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px;}
+.choices-list{display:flex;flex-direction:column;gap:4px;}
+.choice-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;background:var(--bg);border-radius:var(--radius-s);
+  font-size:12px;color:var(--text2);
+}
+.choice-radio{width:14px;height:14px;border:2px solid var(--border2);border-radius:50%;flex-shrink:0;}
+.choice-score{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+
+.logic-rule{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:8px 10px;border-radius:var(--radius-s);
+  border-left:3px solid var(--amber);background:var(--amber-lt);
+  font-size:12px;color:var(--text2);margin-bottom:4px;
+}
+.logic-icon{flex-shrink:0;font-size:13px;}
+
+/* ══════════════════════════════════════════════
+   DOWNLOAD PAGE
+══════════════════════════════════════════════ */
+.download-hero{
+  text-align:center;padding:40px 20px;
+}
+.download-icon{font-size:48px;margin-bottom:16px;}
+.download-h{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;}
+.download-p{font-size:13px;color:var(--text2);max-width:460px;margin:0 auto 24px;}
+
+.qsf-summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  max-width:500px;margin:0 auto 28px;
+}
+@media(max-width:600px){.qsf-summary{grid-template-columns:repeat(2,1fr);}}
+.stat-box{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;text-align:center;
+}
+.stat-n{font-size:24px;font-weight:800;color:var(--blue);}
+.stat-l{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+
+.download-steps{
+  max-width:500px;margin:0 auto;text-align:left;
+  background:var(--blue-lt);border:1px solid var(--blue-md);
+  border-radius:var(--radius);padding:16px 20px;
+}
+.step-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);margin-bottom:8px;}
+.step-item:last-child{margin-bottom:0;}
+.step-circle{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--blue);color:#fff;
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.step-item strong{color:var(--text);}
+
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px 18px;border-radius:var(--radius-s);
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:all .18s;
+}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(15,79,209,.25);}
+.btn-blue:hover{background:#0d44b8;box-shadow:0 4px 12px rgba(15,79,209,.35);}
+.btn-blue:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.btn-white{background:var(--white);color:var(--text);border:1.5px solid var(--border2);}
+.btn-white:hover{border-color:var(--blue);color:var(--blue);}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 2px 8px rgba(0,131,122,.2);}
+.btn-teal:hover{background:#00706a;}
+.btn-lg{padding:12px 28px;font-size:14px;font-weight:700;}
+.btn-full{width:100%;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ══════════════════════════════════════════════
+   ALERTS & LOADER
+══════════════════════════════════════════════ */
+.alert{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:12px 16px;border-radius:var(--radius-s);
+  font-size:13px;line-height:1.5;
+}
+.alert-info  {background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-md);}
+.alert-error {background:var(--red-lt);color:var(--red);}
+.alert-success{background:var(--green-lt);color:var(--green);}
+.alert-icon{flex-shrink:0;font-size:15px;}
+
+.overlay{
+  position:fixed;inset:0;background:rgba(255,255,255,.88);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;z-index:999;
+}
+.overlay.show{display:flex;}
+.spinner{
+  width:44px;height:44px;
+  border:3px solid var(--border);
+  border-top-color:var(--blue);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.overlay-msg{font-size:15px;font-weight:600;color:var(--text);}
+.overlay-sub{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
+
+/* ── Login page ──────────────────────────────── */
+.login-shell{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#f0f4ff 0%,#f5f6fa 100%);
+}
+.login-card{
+  background:var(--white);border-radius:14px;
+  box-shadow:0 8px 40px rgba(0,0,0,.12);
+  padding:40px;width:100%;max-width:400px;
+}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo .logo-sq{width:48px;height:48px;font-size:22px;margin:0 auto 12px;}
+.login-logo h1{font-size:22px;font-weight:800;color:var(--text);}
+.login-logo p{font-size:13px;color:var(--text2);margin-top:4px;}
+.login-form{display:flex;flex-direction:column;gap:14px;}
+.login-divider{text-align:center;font-size:11px;color:var(--text3);position:relative;margin:4px 0;}
+.login-divider::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border);}
+.login-divider span{background:var(--white);padding:0 10px;position:relative;}
+.login-footer{font-size:11px;color:var(--text3);text-align:center;margin-top:16px;}
+.login-footer a{color:var(--blue);text-decoration:none;}
+
+/* ── Empty states ────────────────────────────── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:60px 20px;gap:12px;
+}
+.empty-icon{font-size:48px;opacity:.4;}
+.empty-h{font-size:16px;font-weight:700;color:var(--text);}
+.empty-p{font-size:13px;color:var(--text2);max-width:300px;}
+
+/* ── Misc ────────────────────────────────────── */
+.hidden{display:none!important;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+input[type=file]{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════════ -->
+<div id="loginPage" class="login-shell">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-sq">T</div>
+      <h1>TUSK<span style="color:var(--blue)">.AI</span></h1>
+      <p>Qualtrics Survey Builder</p>
+    </div>
+    <div class="login-form">
+      <div class="field-group">
+        <label class="field-label">Email / Gmail</label>
+        <input class="field-input" id="loginEmail" type="email" placeholder="you@gmail.com" autocomplete="email"/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input class="field-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div id="loginError" class="alert alert-error hidden">
+        <span class="alert-icon">⚠</span><span id="loginErrorMsg"></span>
+      </div>
+      <button class="btn btn-blue btn-full" id="loginBtn" style="margin-top:4px;">Sign In →</button>
+      <div class="login-divider"><span>or continue as guest</span></div>
+      <button class="btn btn-white btn-full" id="guestBtn">Continue without sign in</button>
+    </div>
+    <div class="login-footer">By signing in you accept our <a href="#">Terms of Service</a></div>
+  </div>
+</div>
+
+<!-- ══ APP SHELL ══════════════════════════════════════════════════ -->
+<div id="appShell" class="shell hidden">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-sq">T</div>
+      <div>
+        <div class="logo-name">TUSK<span>.AI</span> <span class="logo-tag">v2.0</span></div>
+      </div>
+    </div>
+    <div class="topbar-user">
+      <span class="user-email" id="topbarEmail"></span>
+      <div class="user-avatar" id="topbarAvatar" title="Settings">?</div>
+      <button class="btn-signout" id="signoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="body">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <button class="nav-item active" data-page="home">
+        <span class="nav-icon">🏠</span> Home
+      </button>
+      <button class="nav-item" data-page="flow">
+        <span class="nav-icon">🔀</span> Survey Flow
+      </button>
+      <button class="nav-item" data-page="download">
+        <span class="nav-icon">⬇</span> Download
+      </button>
+      <div class="nav-sep"></div>
+      <button class="nav-item" data-page="settings">
+        <span class="nav-icon">⚙</span> Settings
+      </button>
+      <div class="sidebar-footer">
+        <div class="version-tag">Auto-updates on refresh</div>
+      </div>
+    </nav>
+
+    <!-- Pages -->
+    <main class="content">
+
+      <!-- ══ HOME ══════════════════════════════════════════════ -->
+      <div class="page active" id="page-home">
+        <div class="page-header">
+          <div class="page-title">Upload Questionnaire</div>
+          <div class="page-desc">Upload your questionnaire file or paste text — TUSK.AI will extract every question, logic rule, and scoring structure.</div>
+        </div>
+
+        <!-- Upload card -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">📄 Questionnaire File</div>
+              <div class="card-sub">PDF, Word, Excel, CSV or plain text</div>
+            </div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+            <div class="upload-area" id="dropZone">
+              <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,.txt"/>
+              <div class="upload-ico">📁</div>
+              <div class="upload-h">Drop your file here</div>
+              <div class="upload-p">or <a href="#" id="browseLink" style="color:var(--blue);font-weight:600;">browse files</a></div>
+              <div class="upload-formats">
+                <span class="fmt-tag">PDF</span>
+                <span class="fmt-tag">DOCX</span>
+                <span class="fmt-tag">XLSX</span>
+                <span class="fmt-tag">CSV</span>
+                <span class="fmt-tag">TXT</span>
+              </div>
+            </div>
+            <div class="file-attached hidden" id="fileAttached">
+              <span style="font-size:18px;">📎</span>
+              <span class="file-attached-name" id="attachedName"></span>
+              <button class="file-remove-btn" id="removeFileBtn" title="Remove">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paste card -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📝 Or Paste Questionnaire Text</div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+            <textarea class="paste-area" id="pasteArea"
+              placeholder="Paste your questionnaire text here…&#10;&#10;Example:&#10;Q1. What is your age?&#10;  a) Under 18   b) 18-24   c) 25-34&#10;&#10;SKIP LOGIC: If Q1 = Under 18, skip to Q5&#10;DISPLAY LOGIC: Show Q3 only if Q2 = Yes&#10;REQUIRED: Q1, Q2"></textarea>
+          </div>
+        </div>
+
+        <!-- Options + Generate -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">⚙ Generation Options</div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+            <div class="options-row" id="optionsRow">
+              <label class="opt-chip selected"><input type="checkbox" checked value="display_logic"> 👁 Display Logic</label>
+              <label class="opt-chip selected"><input type="checkbox" checked value="skip_logic"> ⤵ Skip Logic</label>
+              <label class="opt-chip selected"><input type="checkbox" checked value="scoring"> ★ Scoring</label>
+              <label class="opt-chip selected"><input type="checkbox" checked value="validation"> ✓ Validation</label>
+            </div>
+            <div id="progressWrap" class="progress-wrap hidden">
+              <div class="progress-label">
+                <span id="progressLabel">Processing…</span>
+                <span id="progressPct">0%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            </div>
+            <div id="homeAlert" class="hidden"></div>
+            <div class="btn-row">
+              <button class="btn btn-blue btn-lg" id="generateBtn">✦ Generate Survey Structure</button>
+              <button class="btn btn-white" id="clearBtn">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SURVEY FLOW ════════════════════════════════════════ -->
+      <div class="page" id="page-flow">
+        <div class="page-header">
+          <div class="page-title">Survey Flow</div>
+          <div class="page-desc">Explore the generated survey structure — blocks, questions, logic rules and scoring.</div>
+        </div>
+
+        <div id="flowEmpty" class="empty-state">
+          <div class="empty-icon">🔀</div>
+          <div class="empty-h">No survey generated yet</div>
+          <div class="empty-p">Go to Home, upload your questionnaire and click Generate.</div>
+          <button class="btn btn-blue" onclick="switchPage('home')">← Go to Home</button>
+        </div>
+
+        <div id="flowContent" class="flow-layout hidden" style="flex:1;min-height:0;">
+          <div class="flow-sidebar" id="flowSidebar"></div>
+          <div class="flow-detail" id="flowDetail">
+            <div class="detail-empty">
+              <div class="detail-empty-icon">👈</div>
+              <div>Select a question to see details</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ DOWNLOAD ══════════════════════════════════════════ -->
+      <div class="page" id="page-download">
+        <div id="dlEmpty" class="empty-state">
+          <div class="empty-icon">⬇</div>
+          <div class="empty-h">Nothing to download yet</div>
+          <div class="empty-p">Generate a survey first, then come back here to download the QSF file.</div>
+          <button class="btn btn-blue" onclick="switchPage('home')">← Generate Survey</button>
+        </div>
+
+        <div id="dlContent" class="hidden" style="display:flex;flex-direction:column;gap:20px;">
+          <div class="card">
+            <div class="card-body">
+              <div class="download-hero">
+                <div class="download-icon">📦</div>
+                <div class="download-h" id="dlTitle">Survey Ready</div>
+                <div class="download-p">Your Qualtrics Survey Format file is ready. Click below to download and import it into Qualtrics.</div>
+
+                <div class="qsf-summary" id="dlStats"></div>
+
+                <button class="btn btn-teal btn-lg" id="downloadQsfBtn" style="margin-bottom:24px;">
+                  ⬇ Download .QSF File
+                </button>
+
+                <div class="download-steps">
+                  <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">How to import into Qualtrics</div>
+                  <div class="step-item"><div class="step-circle">1</div><div>Open <strong>Qualtrics</strong> → click <strong>Create new project</strong></div></div>
+                  <div class="step-item"><div class="step-circle">2</div><div>Choose <strong>Survey</strong> → select <strong>Import a QSF file</strong></div></div>
+                  <div class="step-item"><div class="step-circle">3</div><div>Upload the <code style="background:var(--blue-lt);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:11px;">.qsf</code> file you just downloaded</div></div>
+                  <div class="step-item"><div class="step-circle">4</div><div>Review the survey, publish and share ✓</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS ══════════════════════════════════════════ -->
+      <div class="page" id="page-settings">
+        <div class="page-header">
+          <div class="page-title">Settings</div>
+          <div class="page-desc">Configure your account and API connections.</div>
+        </div>
+
+        <div class="settings-grid">
+          <!-- Account card -->
+          <div class="card">
+            <div class="card-head"><div class="card-title">👤 Account</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="field-group">
+                <label class="field-label">Email</label>
+                <input class="field-input" id="settingsEmail" type="email" placeholder="you@gmail.com"/>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Display Name</label>
+                <input class="field-input" id="settingsName" type="text" placeholder="Your name"/>
+              </div>
+              <button class="btn btn-blue btn-full" id="saveAccountBtn">Save Account</button>
+            </div>
+          </div>
+
+          <!-- AI Config card -->
+          <div class="card">
+            <div class="card-head"><div class="card-title">🤖 AI Configuration</div></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+              <div class="field-group">
+                <label class="field-label">Anthropic API Key (optional)</label>
+                <input class="field-input" id="settingsApiKey" type="password" placeholder="sk-ant-api03-…"/>
+                <div class="field-hint">If blank, uses free Pollinations AI</div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">AI Model</label>
+                <select class="field-input" id="settingsModel">
+                  <option value="pollinations">Pollinations AI (Free, no key)</option>
+                  <option value="claude-sonnet">Claude Sonnet (API key required)</option>
+                </select>
+              </div>
+              <div class="api-status idle" id="apiStatus">
+                <div class="status-dot"></div>
+                <span>Not tested</span>
+              </div>
+              <button class="btn btn-white btn-full" id="testApiBtn">Test Connection</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="card-title">ℹ About TUSK.AI</div></div>
+          <div class="card-body">
+            <div style="font-size:13px;color:var(--text2);line-height:1.8;">
+              <strong>TUSK.AI</strong> is a Qualtrics Survey Builder that reads questionnaire documents and generates valid QSF files with full logic support.<br><br>
+              <strong>Auto-updates:</strong> This app is hosted online. Refresh the page to get the latest version — no reinstall needed.<br><br>
+              <strong>Supported formats:</strong> PDF, DOCX, DOC, XLSX, XLS, CSV, TXT<br>
+              <strong>Features:</strong> Display logic, Skip logic, Scoring, Validation, Matrix questions, NPS, Rank Order
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-msg" id="overlayMsg">Processing…</div>
+  <div class="overlay-sub" id="overlaySub"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PURE-JS DOCX + XLSX EXTRACTOR
+══════════════════════════════════════════════════════════════ -->
+<script>
+// ── ZIP reader ────────────────────────────────────────────────────
+class ZipReader {
+  constructor(buffer) {
+    this.b = new Uint8Array(buffer);
+    this.entries = {};
+    this._parse();
+  }
+  u16(i){ return this.b[i]|(this.b[i+1]<<8); }
+  u32(i){ return ((this.b[i])|(this.b[i+1]<<8)|(this.b[i+2]<<16)|(this.b[i+3]<<24))>>>0; }
+  _parse(){
+    const b=this.b; let eocd=-1;
+    for(let i=b.length-22;i>=0;i--){
+      if(b[i]===0x50&&b[i+1]===0x4b&&b[i+2]===0x05&&b[i+3]===0x06){eocd=i;break;}
+    }
+    if(eocd<0) throw new Error("Not a valid ZIP file");
+    const cdOff=this.u32(eocd+16), cdNum=this.u16(eocd+8);
+    let pos=cdOff;
+    for(let i=0;i<cdNum;i++){
+      if(this.u32(pos)!==0x02014b50) break;
+      const method=this.u16(pos+10),cSize=this.u32(pos+20),uSize=this.u32(pos+24);
+      const fnLen=this.u16(pos+28),extLen=this.u16(pos+30),cmtLen=this.u16(pos+32);
+      const lhOff=this.u32(pos+42);
+      const name=new TextDecoder().decode(b.slice(pos+46,pos+46+fnLen));
+      this.entries[name]={method,cSize,uSize,lhOff};
+      pos+=46+fnLen+extLen+cmtLen;
+    }
+  }
+  async readText(name){
+    const e=this.entries[name]; if(!e) return null;
+    const b=this.b; let p=e.lhOff;
+    if(this.u32(p)!==0x04034b50) return null;
+    const fnL=this.u16(p+26),exL=this.u16(p+28);
+    p+=30+fnL+exL;
+    const comp=b.slice(p,p+e.cSize);
+    const bytes=e.method===0?comp:e.method===8?await this._inflate(comp):null;
+    if(!bytes) throw new Error("Unsupported compression");
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+  _inflate(data){
+    const ds=new DecompressionStream("deflate-raw");
+    const w=ds.writable.getWriter(),r=ds.readable.getReader();
+    w.write(data);w.close();
+    const chunks=[];
+    const pump=()=>r.read().then(({done,value})=>{if(!done){chunks.push(value);return pump();}});
+    return pump().then(()=>{
+      const total=chunks.reduce((n,c)=>n+c.length,0);
+      const out=new Uint8Array(total);let off=0;
+      for(const c of chunks){out.set(c,off);off+=c.length;}
+      return out;
+    });
+  }
+  listFiles(){ return Object.keys(this.entries); }
+}
+
+function xmlStrip(s){
+  return (s||"")
+    .replace(/<[^>]+>/g," ")
+    .replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">")
+    .replace(/&quot;/g,'"').replace(/&apos;/g,"'")
+    .replace(/&#x([0-9a-fA-F]+);/g,(_,h)=>String.fromCharCode(parseInt(h,16)))
+    .replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(+n))
+    .replace(/\s+/g," ").trim();
+}
+
+async function extractDOCX(buffer){
+  const zip=new ZipReader(buffer);
+  const xml=await zip.readText("word/document.xml");
+  if(!xml) throw new Error("Cannot read Word document.");
+  const paras=[]; let cur=0;
+  while(true){
+    const start=xml.indexOf("<w:p",cur);
+    if(start<0) break;
+    const end=xml.indexOf("</w:p>",start);
+    if(end<0) break;
+    const p=xml.slice(start,end+6);
+    const texts=[];
+    let ti=0;
+    while(true){
+      const ts=p.indexOf("<w:t",ti); if(ts<0) break;
+      const te=p.indexOf("</w:t>",ts); if(te<0) break;
+      const inner=p.slice(p.indexOf(">",ts)+1,te);
+      if(inner) texts.push(inner);
+      ti=te+6;
+    }
+    const line=texts.join("").trim();
+    if(line) paras.push(line);
+    cur=end+6;
+  }
+  if(!paras.length) throw new Error("No text found in Word document.");
+  return paras.join("\n");
+}
+
+async function extractXLSX(buffer){
+  const zip=new ZipReader(buffer);
+  const ssXml=await zip.readText("xl/sharedStrings.xml")||"";
+  const strs=[];
+  let si=ssXml.indexOf("<si>");
+  while(si>=0){
+    const end=ssXml.indexOf("</si>",si);
+    if(end<0) break;
+    strs.push(xmlStrip(ssXml.slice(si,end+5)));
+    si=ssXml.indexOf("<si>",end);
+  }
+  const sheets=zip.listFiles().filter(f=>/^xl\/worksheets\/sheet\d+\.xml$/.test(f)).sort();
+  const parts=[];
+  for(const sf of sheets){
+    const sxml=await zip.readText(sf); if(!sxml) continue;
+    const rows=[];
+    let ri=sxml.indexOf("<row");
+    while(ri>=0){
+      const re=sxml.indexOf("</row>",ri); if(re<0) break;
+      const row=sxml.slice(ri,re+6);
+      const vals=[]; let ci=row.indexOf("<c ");
+      while(ci>=0){
+        const ce=row.indexOf("</c>",ci); if(ce<0) break;
+        const cell=row.slice(ci,ce+4);
+        const tm=cell.match(/t="([^"]*)"/);
+        const vm=cell.match(/<v>([^<]*)<\/v>/);
+        const v=vm?vm[1]:"";
+        let val="";
+        if(tm&&tm[1]==="s") val=strs[parseInt(v)]||"";
+        else val=v;
+        vals.push((val+"").replace(/,/g,";"));
+        ci=row.indexOf("<c ",ce);
+      }
+      if(vals.some(v=>v.trim())) rows.push(vals.join(","));
+      ri=sxml.indexOf("<row",re);
+    }
+    const sn=sf.match(/sheet(\d+)/)?.[1]||"";
+    if(rows.length) parts.push(`--- Sheet ${sn} ---\n${rows.join("\n")}`);
+  }
+  if(!parts.length) throw new Error("No content in spreadsheet.");
+  return parts.join("\n\n");
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     QSF BUILDER
+══════════════════════════════════════════════════════════════ -->
+<script>
+function uid(n){
+  const c="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join("");
+}
+function stripTags(s){return String(s||"").replace(/<[^>]+>/g,"");}
+
+function buildQSF(survey){
+  const now=new Date().toISOString().replace("T"," ").slice(0,19);
+  const sid=`SV_${uid(11)}`;
+  const elements=[];
+  const qMap={};
+  let qn=1;
+  for(const blk of survey.blocks||[])
+    for(const q of blk.questions||[])
+      qMap[q.id]=`QID${qn++}`;
+
+  // Blocks element
+  const blkList=[];
+  let bn=1;
+  for(const blk of survey.blocks||[]){
+    const bid=`BL_${uid(11)}`;
+    blk._bid=bid;
+    blkList.push({
+      Type:"Standard",SubType:"",ID:bid,
+      Description:blk.blockName||`Block ${bn}`,
+      BlockElements:(blk.questions||[]).map(q=>({Type:"Question",QuestionID:qMap[q.id]})),
+      Options:{BlockLocking:"false",RandomizeQuestions:"false",BlockVisibility:"Expanded"}
+    });
+    bn++;
+  }
+  blkList.push({Type:"Trash",Description:"Trash / Unused Questions",ID:`BL_${uid(11)}`,BlockElements:[]});
+  elements.push({SurveyID:sid,Element:"BL",PrimaryAttribute:"Survey Blocks",SecondaryAttribute:null,TertiaryAttribute:null,Payload:blkList});
+
+  // Questions
+  for(const blk of survey.blocks||[]){
+    for(const q of blk.questions||[]){
+      const qid=qMap[q.id];
+      const choices=normaliseChoices(q.choices);
+      const sel=q.selector||(q.multiSelect&&q.type==="MC"?"MAVR":({MC:"SAVR",TE:"SL",Matrix:"Likert",Slider:"HSLIDER",RO:"DND",DB:"TB",CS:"CS"}[q.type]||"SL"));
+      const sub=q.subSelector||(["TE","Matrix"].includes(q.type)?"TX":null);
+      const payload={
+        QuestionID:qid,DataExportTag:q.id,QuestionType:q.type||"TE",
+        Selector:sel,SubSelector:sub,
+        DataVisibility:{Private:false,Hidden:false},
+        Configuration:{QuestionDescriptionOption:"UseText",LabelPosition:"BELOW",NumColumns:1},
+        QuestionText:q.text||"",QuestionText_Unsafe:q.text||"",
+        Validation:buildVal(q),GradingData:buildGrade(q,choices),
+        Language:[],NextChoiceId:choices.length+1,
+        NextAnswerId:(q.matrixColumns?.length||0)+1,
+        QuestionDescription:stripTags(q.text||"").slice(0,100),
+        ChoiceOrder:choices.map((_,i)=>i+1),
+        Choices:buildChoiceObj(choices),Randomization:null,
+        DisplayLogic:buildDL(q,qMap),SkipLogic:buildSL(q,qMap)
+      };
+      if(q.type==="Matrix"){
+        payload.Answers=buildAnswers(q);
+        payload.AnswerOrder=(q.matrixColumns||[]).map((_,i)=>i+1);
+        payload.Choices={};payload.ChoiceOrder=[];
+        (q.matrixRows||[]).forEach((r,i)=>{
+          payload.Choices[i+1]={Display:typeof r==="string"?r:r.text||r};
+          payload.ChoiceOrder.push(i+1);
+        });
+        payload.NextChoiceId=(q.matrixRows||[]).length+1;
+      }
+      if(q.type==="Slider"){
+        const isNPS=sel==="NPS";
+        payload.Labels=isNPS
+          ?{"0":{Display:q.npsLabels?.left||"Not at all"},"10":{Display:q.npsLabels?.right||"Extremely likely"}}
+          :{"0":{Display:String(q.sliderMin??0)},"100":{Display:String(q.sliderMax??100)}};
+        if(!isNPS){payload.Configuration.MinValue=q.sliderMin??0;payload.Configuration.MaxValue=q.sliderMax??100;payload.Configuration.ShowValue=true;}
+        payload.Choices={};payload.ChoiceOrder=[];
+      }
+      elements.push({SurveyID:sid,Element:"SQ",PrimaryAttribute:qid,SecondaryAttribute:stripTags(q.text||"").slice(0,100),TertiaryAttribute:null,Payload:payload});
+    }
+  }
+
+  // Scoring
+  const hasScore=survey.scoring?.enabled||(survey.blocks||[]).some(b=>(b.questions||[]).some(q=>q.scoring?.enabled||(q.choices||[]).some(c=>c?.score!=null)));
+  if(hasScore){
+    const cats=survey.scoring?.categories?.length?survey.scoring.categories:[{name:"Total Score",description:"",range:{low:0,high:999}}];
+    const colors=["#C00000","#ED7D31","#FFC000","#70AD47","#4472C4","#7030A0"];
+    elements.push({SurveyID:sid,Element:"SC",PrimaryAttribute:"Scoring",SecondaryAttribute:null,TertiaryAttribute:null,
+      Payload:{ScoringCategories:cats.map((c,i)=>({ID:`SC_${uid(8)}`,Name:c.name||`Cat ${i+1}`,Description:c.description||"",RangeLow:c.range?.low??0,RangeHigh:c.range?.high??100,Color:colors[i%colors.length]})),ScoringCategoryGroups:[],ScoreQuestionsAutomatically:"false"}});
+  }
+
+  // Options
+  elements.push({SurveyID:sid,Element:"SO",PrimaryAttribute:"Survey Options",SecondaryAttribute:null,TertiaryAttribute:null,
+    Payload:{BackButton:"false",SaveAndContinue:"true",SurveyProtection:"PublicSurvey",BallotBoxStuffingPrevention:"false",NoIndex:"Yes",SecureResponseFiles:"true",SurveyExpiration:"None",SurveyTermination:"DefaultMessage",Header:"",Footer:"",ProgressBarDisplay:"WithoutText",PartialData:"+7 days",ValidationMessage:null,PreviousButton:"",NextButton:"",SurveyTitle:survey.surveyTitle||"Untitled Survey",SkinLibrary:"qualtrics",SkinType:"templated",Skin:{brandingId:null,templateId:"brs"},NewScoring:2}});
+
+  // Flow
+  const flows=blkList.filter(b=>b.Type==="Standard").map(b=>({ID:`FL_${uid(11)}`,Type:"Block",FlowID:b.ID,Autofill:[]}));
+  flows.push({ID:`FL_${uid(11)}`,Type:"EndSurvey",EndingType:"Default",Options:{Advanced:"false"}});
+  const rootId=`FL_${uid(11)}`;
+  elements.push({SurveyID:sid,Element:"FL",PrimaryAttribute:"Survey Flow",SecondaryAttribute:rootId,TertiaryAttribute:null,
+    Payload:{Type:"Root",FlowID:rootId,Flow:flows,Properties:{Count:flows.length,RemovedFieldsets:[]}}});
+
+  if(survey.endMessage){
+    const msId=`MS_${uid(11)}`;
+    elements.push({SurveyID:sid,Element:"MS",PrimaryAttribute:msId,SecondaryAttribute:"End of Survey",TertiaryAttribute:null,
+      Payload:{MessageID:msId,Category:"ENDOFSURVEY",SubCategory:"",Message:survey.endMessage,MessageText:survey.endMessage,MessageStatus:"Dirty",Language:"EN"}});
+  }
+
+  return {
+    SurveyEntry:{SurveyID:sid,SurveyName:survey.surveyTitle||"Untitled Survey",SurveyDescription:survey.surveyDescription||null,SurveyOwnerID:null,SurveyBrandID:null,DivisionID:null,SurveyLanguage:"EN",SurveyActiveResponseSet:null,SurveyStatus:"Inactive",SurveyStartDate:"0000-00-00 00:00:00",SurveyExpirationDate:"0000-00-00 00:00:00",SurveyCreationDate:now,CreatorID:null,LastModified:now,LastAccessed:"0000-00-00 00:00:00",LastActivated:"0000-00-00 00:00:00",Deleted:null},
+    SurveyElements:elements
+  };
+}
+
+function normaliseChoices(raw=[]){
+  return (raw||[]).map(c=>typeof c==="string"?{text:c,score:null,exclusive:false,hasTextEntry:false}:{text:c.text||c.Display||"",score:c.score??null,exclusive:!!c.exclusive,hasTextEntry:!!c.hasTextEntry});
+}
+function buildChoiceObj(choices){
+  const o={};choices.forEach((c,i)=>{o[i+1]={Display:c.text,ExclusiveAnswer:c.exclusive,TextEntry:c.hasTextEntry};});return o;
+}
+function buildAnswers(q){
+  const o={};(q.matrixColumns||[]).forEach((c,i)=>{o[i+1]={Display:typeof c==="string"?c:c.text||c};});return o;
+}
+function buildVal(q){
+  const v=q.validation||{};
+  const fr=(q.required||v.required)?"ON":"OFF";
+  const s={ForceResponse:fr,ForceResponseType:fr,Type:"None"};
+  const tm={number:()=>{s.Type="ValidNumber";s.ContentType="ValidNumber";if(v.min!=null)s.MinValue=String(v.min);if(v.max!=null)s.MaxValue=String(v.max);},
+    email:()=>{s.Type="ValidEmail";s.ContentType="ValidEmail";},
+    phone:()=>{s.Type="ValidPhone";s.ContentType="ValidPhone";},
+    date:()=>{s.Type="ValidDate";s.ContentType="ValidDate";},
+    url:()=>{s.Type="ValidURL";s.ContentType="ValidURL";},
+    wordCount:()=>{s.Type="WordCount";if(v.minWords)s.MinWords=String(v.minWords);if(v.maxWords)s.MaxWords=String(v.maxWords);},
+    regex:()=>{s.Type="CustomValidation";s.CustomValidation=v.pattern||"";}
+  };
+  if(tm[v.type]) tm[v.type]();
+  return {Settings:s};
+}
+function buildGrade(q,choices){
+  const sm=q.scoring?.choiceScores||{};
+  if(!q.scoring?.enabled&&!choices.some(c=>c.score!=null)&&!Object.keys(sm).length) return [];
+  return choices.map((c,i)=>{const sc=c.score??sm[i+1]??0;return{ChoiceID:String(i+1),Score:sc,Value:String(sc)};});
+}
+function opMap(op){return{EqualTo:"EqualTo",NotEqualTo:"NotEqualTo",Contains:"Contains",GreaterThan:"GreaterThan",LessThan:"LessThan",Selected:"Selected",NotSelected:"NotSelected"}[op]||"EqualTo";}
+function destMap(d,m){if(!d||d==="EndOfSurvey")return"ENDOFSURVEY";if(d==="EndOfBlock")return"ENDOFBLOCK";return m[d]||d;}
+function buildDL(q,qMap){
+  if(!q.displayLogic?.length) return {};
+  const conds=q.displayLogic.map((dl,i)=>{
+    const src=qMap[dl.questionId]||dl.questionId;
+    const cid=String(dl.choiceIndex||1);
+    const loc=`q://${src}/SelectableChoice/${cid}`;
+    const c={Type:"Question",QuestionID:src,Operator:opMap(dl.operator),Value:String(dl.value??""),LeftOperand:loc,RightOperand:String(dl.value??""),LogicType:"Question",QuestionIsInLoop:"no",QuestionIDFromLocator:src,ChoiceLocator:loc,Locator:loc,Description:`${dl.questionId} ${dl.operator} "${dl.value}"`,ID:i,Index:i};
+    if(i>0) c.Conjunction=dl.conjunction||"And";
+    return c;
+  });
+  return{"0":{LogicType:"BooleanExpression",Description:"Display this question if...",ByDefault:false,Type:"BooleanExpression",inPage:false,Conditions:conds},Type:"BooleanExpression",inPage:false};
+}
+function buildSL(q,qMap){
+  if(!q.skipLogic?.length) return [];
+  return q.skipLogic.map((sl,i)=>{
+    const cond=sl.condition||{};
+    const src=qMap[cond.questionId]||qMap[q.id]||q.id;
+    const cid=String(cond.choiceIndex||1);
+    const loc=`q://${src}/SelectableChoice/${cid}`;
+    return{SurveyID:null,QuestionID:src,Operator:opMap(cond.operator||"EqualTo"),Value:String(cond.value??""),ChoiceLocator:loc,Locator:loc,Description:`If "${cond.value}" → ${sl.destination}`,SkipToDestination:destMap(sl.destination,qMap),SkipToDescription:sl.destination||"EndOfSurvey",ID:i};
+  });
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APP LOGIC
+══════════════════════════════════════════════════════════════ -->
+<script>
+// ── State ─────────────────────────────────────────────────────────
+let appState = {
+  user: null,
+  apiKey: "",
+  model: "pollinations",
+  survey: null,
+  qsf: null,
+  uploadedFile: null,
+};
+
+// ── Boot ──────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  loadSettings();
+  const saved = localStorage.getItem("tusk_user");
+  if (saved) {
+    appState.user = JSON.parse(saved);
+    showApp();
+  }
+  initLogin();
+  initNav();
+  initHome();
+  initSettings();
+  initDownload();
+});
+
+function loadSettings() {
+  appState.apiKey = localStorage.getItem("tusk_apikey") || "";
+  appState.model  = localStorage.getItem("tusk_model")  || "pollinations";
+}
+
+// ── Login ─────────────────────────────────────────────────────────
+function initLogin() {
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const pass  = document.getElementById("loginPass").value;
+    if (!email) { showLoginError("Please enter your email."); return; }
+    if (!pass)  { showLoginError("Please enter your password."); return; }
+    // Accept any credentials — store locally
+    appState.user = { email, name: email.split("@")[0] };
+    localStorage.setItem("tusk_user", JSON.stringify(appState.user));
+    showApp();
+  });
+
+  document.getElementById("guestBtn").addEventListener("click", () => {
+    appState.user = { email: "Guest", name: "Guest" };
+    localStorage.setItem("tusk_user", JSON.stringify(appState.user));
+    showApp();
+  });
+
+  document.getElementById("loginEmail").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("loginPass").focus();
+  });
+  document.getElementById("loginPass").addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("loginBtn").click();
+  });
+}
+function showLoginError(msg) {
+  const el = document.getElementById("loginError");
+  document.getElementById("loginErrorMsg").textContent = msg;
+  el.classList.remove("hidden");
+}
+function showApp() {
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("appShell").classList.remove("hidden");
+  const u = appState.user;
+  document.getElementById("topbarEmail").textContent = u.email;
+  document.getElementById("topbarAvatar").textContent = (u.name||"G")[0].toUpperCase();
+  document.getElementById("settingsEmail").value = u.email;
+  document.getElementById("settingsName").value  = u.name || "";
+  document.getElementById("settingsApiKey").value = appState.apiKey;
+  document.getElementById("settingsModel").value  = appState.model;
+}
+document.getElementById("signoutBtn")?.addEventListener("click", () => {
+  localStorage.removeItem("tusk_user");
+  appState.user = null; appState.survey = null;
+  document.getElementById("appShell").classList.add("hidden");
+  document.getElementById("loginPage").classList.remove("hidden");
+});
+
+// ── Navigation ────────────────────────────────────────────────────
+function initNav() {
+  document.querySelectorAll(".nav-item[data-page]").forEach(btn => {
+    btn.addEventListener("click", () => switchPage(btn.dataset.page));
+  });
+}
+function switchPage(name) {
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  const navEl = document.querySelector(`.nav-item[data-page="${name}"]`);
+  if (navEl) navEl.classList.add("active");
+  const pageEl = document.getElementById(`page-${name}`);
+  if (pageEl) pageEl.classList.add("active");
+  if (name === "flow")     renderFlow();
+  if (name === "download") renderDownload();
+}
+
+// ── Home ──────────────────────────────────────────────────────────
+function initHome() {
+  const dropZone   = document.getElementById("dropZone");
+  const fileInput  = document.getElementById("fileInput");
+  const browseLink = document.getElementById("browseLink");
+
+  browseLink.addEventListener("click", e => { e.preventDefault(); fileInput.click(); });
+  dropZone.addEventListener("click", e => { if (e.target !== browseLink) fileInput.click(); });
+  fileInput.addEventListener("change", () => { if (fileInput.files[0]) attachFile(fileInput.files[0]); });
+
+  dropZone.addEventListener("dragover",  e => { e.preventDefault(); dropZone.classList.add("dragging"); });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
+  dropZone.addEventListener("drop", e => {
+    e.preventDefault(); dropZone.classList.remove("dragging");
+    if (e.dataTransfer.files[0]) attachFile(e.dataTransfer.files[0]);
+  });
+
+  document.getElementById("removeFileBtn").addEventListener("click", () => {
+    appState.uploadedFile = null;
+    fileInput.value = "";
+    document.getElementById("fileAttached").classList.add("hidden");
+    dropZone.classList.remove("hidden");
+  });
+
+  document.getElementById("generateBtn").addEventListener("click", runGenerate);
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    appState.uploadedFile = null; fileInput.value = "";
+    document.getElementById("pasteArea").value = "";
+    document.getElementById("fileAttached").classList.add("hidden");
+    dropZone.classList.remove("hidden");
+    hideAlert("homeAlert");
+    hideProgress();
+  });
+
+  // Chip toggles
+  document.querySelectorAll(".opt-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      chip.classList.toggle("selected");
+      chip.querySelector("input").checked = chip.classList.contains("selected");
+    });
+  });
+}
+
+function attachFile(file) {
+  appState.uploadedFile = file;
+  document.getElementById("attachedName").textContent = file.name;
+  document.getElementById("fileAttached").classList.remove("hidden");
+  document.getElementById("dropZone").classList.add("hidden");
+  hideAlert("homeAlert");
+}
+
+async function runGenerate() {
+  const hasFile = !!appState.uploadedFile;
+  const paste   = document.getElementById("pasteArea").value.trim();
+  if (!hasFile && !paste.length) {
+    showAlert("homeAlert", "error", "Please upload a file or paste questionnaire text first.");
+    return;
+  }
+
+  const btn = document.getElementById("generateBtn");
+  btn.disabled = true;
+
+  try {
+    // Step 1 — Extract text
+    let text = "";
+    if (hasFile) {
+      showProgress("Reading file…", 10);
+      text = await extractFileText(appState.uploadedFile);
+    } else {
+      text = paste;
+    }
+
+    // Step 2 — AI parse
+    showProgress("Sending to AI…", 35);
+    const raw = await callAI(text);
+    showProgress("Parsing response…", 70);
+    const survey = cleanParse(raw);
+
+    showProgress("Building QSF…", 90);
+    appState.survey = survey;
+    appState.qsf    = buildQSF(survey);
+
+    showProgress("Done!", 100);
+    await sleep(500);
+    hideProgress();
+
+    showAlert("homeAlert", "success",
+      `✓ Survey generated: ${survey.blocks?.length || 0} blocks, ${countQ(survey)} questions. Go to Survey Flow or Download.`);
+
+    // Auto-navigate to flow
+    setTimeout(() => switchPage("flow"), 1200);
+
+  } catch(err) {
+    hideProgress();
+    showAlert("homeAlert", "error", "Error: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function countQ(survey) {
+  return (survey.blocks||[]).reduce((n,b)=>n+(b.questions?.length||0),0);
+}
+
+// ── File extraction ───────────────────────────────────────────────
+async function extractFileText(file) {
+  const ext = file.name.split(".").pop().toLowerCase();
+
+  if (["txt","csv"].includes(ext)) {
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=e=>res(e.target.result);
+      r.onerror=()=>rej(new Error("Cannot read file"));
+      r.readAsText(file);
+    });
+  }
+
+  const buffer = await file.arrayBuffer();
+
+  if (ext === "pdf") {
+    if (typeof pdfjsLib === "undefined") throw new Error("PDF library not loaded — check internet.");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.min.js";
+    const pdf = await pdfjsLib.getDocument({data:buffer}).promise;
+    const pages = [];
+    for (let i=1;i<=pdf.numPages;i++) {
+      const pg  = await pdf.getPage(i);
+      const cnt = await pg.getTextContent();
+      const ln  = cnt.items.map(x=>x.str).join(" ").trim();
+      if (ln) pages.push(ln);
+    }
+    if (!pages.length) throw new Error("No text in PDF — may be a scanned image. Please paste the text.");
+    return pages.join("\n\n");
+  }
+
+  if (["doc","docx"].includes(ext)) return extractDOCX(buffer);
+  if (["xlsx","xls"].includes(ext)) return extractXLSX(buffer);
+
+  throw new Error(`Unsupported file type: .${ext}`);
+}
+
+// ── AI Parsing ────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are an expert Qualtrics survey programmer. Parse a questionnaire and return ONLY a JSON object. No markdown, no explanation, nothing before { or after }.
+
+JSON schema:
+{"surveyTitle":"string","surveyDescription":"string","blocks":[{"blockName":"string","questions":[{"id":"Q1","text":"text","type":"MC|TE|Matrix|Slider|RO|DB|CS","selector":"SAVR|MAVR|DL|SL|ML|NPS|Likert|DND|HSLIDER|TB|CS","subSelector":"TX|null","required":false,"multiSelect":false,"choices":[{"text":"text","score":null,"exclusive":false,"hasTextEntry":false}],"matrixRows":[],"matrixColumns":[],"sliderMin":0,"sliderMax":100,"sliderLabels":{"left":"","right":""},"validation":{"type":"none|number|email|phone|date|url|wordCount|text|regex","required":false,"min":null,"max":null,"minChars":null,"maxChars":null,"minWords":null,"maxWords":null,"pattern":null},"scoring":{"enabled":false,"category":null,"choiceScores":{}},"displayLogic":[{"questionId":"Q1","choiceIndex":1,"operator":"EqualTo|NotEqualTo|Selected|NotSelected|GreaterThan|LessThan","value":"","conjunction":"And|Or"}],"skipLogic":[{"condition":{"questionId":"Q1","choiceIndex":1,"operator":"EqualTo","value":""},"destination":"Q2|EndOfSurvey|EndOfBlock"}]}]}],"scoring":{"enabled":false,"categories":[]},"endMessage":"Thank you.","logicSummary":{"totalQuestions":0,"questionsWithDisplayLogic":0,"questionsWithSkipLogic":0,"questionsWithScoring":0,"questionsWithValidation":0,"questionTypes":{}}}
+
+Rules: MC=choices(MAVR if multi-select,SAVR single,DL dropdown). TE=open text(SL single line,ML paragraph). Matrix=grid(Likert). Slider=rating/NPS(NPS selector for 0-10). RO=rank(DND). DB=header/instruction(TB). CS=point allocation. Extract ALL skip/display logic. required:true for * or "required". Auto-assign Likert scores. Return ONLY the JSON.`;
+
+async function callAI(text) {
+  const userContent = `Parse this questionnaire. Return ONLY the JSON:\n\n${text}`;
+
+  // Try Anthropic API if key provided
+  if (appState.apiKey && appState.model === "claude-sonnet") {
+    return callAnthropic(userContent);
+  }
+
+  // Try Pollinations — multiple methods
+  return callPollinations(userContent);
+}
+
+async function callAnthropic(userContent) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": appState.apiKey,
+      "anthropic-version": "2023-06-01"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 8000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userContent }]
+    })
+  });
+  if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
+  const data = await res.json();
+  const raw = data?.content?.[0]?.text || "";
+  if (!raw.trim()) throw new Error("Empty response from Anthropic.");
+  return raw;
+}
+
+async function callPollinations(userContent) {
+  // Method A: OpenAI-compat endpoint, handle both JSON and streaming
+  try {
+    const res = await fetch("https://text.pollinations.ai/openai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "openai",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user",   content: userContent }
+        ],
+        temperature: 0.1,
+        max_tokens: 8000,
+        seed: 42
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const ct = res.headers.get("content-type") || "";
+    let raw = "";
+    if (ct.includes("text/event-stream")) {
+      raw = await drainSSE(res);
+    } else if (ct.includes("application/json")) {
+      const d = await res.json();
+      raw = d?.choices?.[0]?.message?.content || d?.text || d?.content || "";
+    } else {
+      raw = await res.text();
+    }
+    if (raw.trim().length > 20) return raw;
+  } catch(e) { console.warn("Pollinations /openai failed:", e.message); }
+
+  // Method B: Plain text POST
+  try {
+    const res = await fetch("https://text.pollinations.ai/", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: SYSTEM_PROMPT + "\n\n" + userContent
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    if (raw.trim().length > 20) return raw;
+  } catch(e) { console.warn("Pollinations plain POST failed:", e.message); }
+
+  // Method C: GET endpoint
+  try {
+    const prompt = (SYSTEM_PROMPT + "\n\n" + userContent).slice(0, 2000);
+    const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai&seed=42`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    if (raw.trim().length > 20) return raw;
+  } catch(e) { console.warn("Pollinations GET failed:", e.message); }
+
+  throw new Error("AI service unavailable. Please check your internet connection or add an Anthropic API key in Settings.");
+}
+
+async function drainSSE(res) {
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let content = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = dec.decode(value, { stream: true });
+    for (const line of chunk.split("\n")) {
+      if (!line.startsWith("data: ")) continue;
+      const data = line.slice(6).trim();
+      if (data === "[DONE]") return content;
+      try {
+        const p = JSON.parse(data);
+        const delta = p?.choices?.[0]?.delta?.content;
+        if (delta) content += delta;
+      } catch(_) {}
+    }
+  }
+  return content;
+}
+
+function cleanParse(raw) {
+  let s = raw.replace(/^```json\s*/i,"").replace(/^```\s*/i,"").replace(/```\s*$/i,"").trim();
+  const m = s.match(/(\{[\s\S]*\})/); if (m) s = m[1];
+  let p;
+  try { p = JSON.parse(s); } catch { throw new Error("AI returned unexpected format. Try again."); }
+  for (const b of p.blocks||[])
+    for (const q of b.questions||[])
+      if (Array.isArray(q.choices) && q.choices.length && typeof q.choices[0]==="string")
+        q.choices = q.choices.map(c=>({text:c,score:null,exclusive:false,hasTextEntry:false}));
+  return p;
+}
+
+// ── Survey Flow ───────────────────────────────────────────────────
+function renderFlow() {
+  const empty   = document.getElementById("flowEmpty");
+  const content = document.getElementById("flowContent");
+  const sidebar = document.getElementById("flowSidebar");
+
+  if (!appState.survey) {
+    empty.classList.remove("hidden"); content.classList.add("hidden"); return;
+  }
+  empty.classList.add("hidden"); content.classList.remove("hidden");
+
+  sidebar.innerHTML = "";
+  const survey = appState.survey;
+  let first = true;
+
+  for (const blk of survey.blocks || []) {
+    const card = document.createElement("div");
+    card.className = "block-card";
+    const qs = blk.questions || [];
+    card.innerHTML = `
+      <div class="block-header">
+        <span>${esc(blk.blockName || "Block")}</span>
+        <span class="q-count">${qs.length} Q</span>
+      </div>
+      <div class="block-questions">
+        ${qs.map(q => `
+          <div class="q-row" data-qid="${esc(q.id)}">
+            <span class="q-type-badge badge-${q.type||'TE'}">${q.type||'TE'}</span>
+            <span>${esc(stripTags(q.text||"").slice(0,50))}${stripTags(q.text||"").length>50?"…":""}</span>
+          </div>
+        `).join("")}
+      </div>`;
+    sidebar.appendChild(card);
+    // Click handlers
+    card.querySelectorAll(".q-row").forEach(row => {
+      row.addEventListener("click", () => {
+        document.querySelectorAll(".q-row").forEach(r=>r.classList.remove("active"));
+        row.classList.add("active");
+        const qid = row.dataset.qid;
+        const q = qs.find(x=>x.id===qid);
+        if (q) renderDetail(q);
+      });
+    });
+    // Select first question
+    if (first && qs.length) {
+      const fRow = card.querySelector(".q-row");
+      if (fRow) { fRow.classList.add("active"); renderDetail(qs[0]); }
+      first = false;
+    }
+  }
+}
+
+function renderDetail(q) {
+  const el = document.getElementById("flowDetail");
+  const choices = normaliseChoices(q.choices);
+
+  let html = `<div class="detail-q-text">${esc(q.text || "(No text)")}</div>`;
+
+  html += `<div class="detail-meta">
+    <span class="meta-chip type">${q.type || "TE"}${q.multiSelect ? " (multi)" : ""}</span>
+    <span class="meta-chip ${q.required ? "req":"opt"}">${q.required ? "Required" : "Optional"}</span>
+    ${q.displayLogic?.length ? `<span class="meta-chip logic">👁 Display Logic</span>` : ""}
+    ${q.skipLogic?.length ? `<span class="meta-chip logic">⤵ Skip Logic</span>` : ""}
+    ${q.scoring?.enabled ? `<span class="meta-chip score">★ Scored</span>` : ""}
+  </div>`;
+
+  if (choices.length) {
+    html += `<div class="detail-section-title">Answer Choices</div>
+    <div class="choices-list">
+      ${choices.map((c,i) => `
+        <div class="choice-item">
+          <div class="choice-radio"></div>
+          <span>${esc(c.text)}</span>
+          ${c.score != null ? `<span class="choice-score">${c.score} pts</span>` : ""}
+        </div>`).join("")}
+    </div>`;
+  }
+
+  if (q.matrixRows?.length) {
+    html += `<div class="detail-section-title">Matrix Rows</div>
+      <div class="choices-list">${q.matrixRows.map(r=>`<div class="choice-item"><div class="choice-radio"></div><span>${esc(typeof r==="string"?r:r.text||r)}</span></div>`).join("")}</div>`;
+    html += `<div class="detail-section-title">Matrix Columns</div>
+      <div class="choices-list">${(q.matrixColumns||[]).map(c=>`<div class="choice-item"><div style="width:14px;height:10px;border:2px solid var(--border2);border-radius:2px;flex-shrink:0;"></div><span>${esc(typeof c==="string"?c:c.text||c)}</span></div>`).join("")}</div>`;
+  }
+
+  if (q.displayLogic?.length) {
+    html += `<div class="detail-section-title">Display Logic</div>`;
+    for (const dl of q.displayLogic) {
+      html += `<div class="logic-rule"><span class="logic-icon">👁</span><span>Show if <strong>${dl.questionId}</strong> ${dl.operator} "<strong>${esc(String(dl.value||""))}</strong>"</span></div>`;
+    }
+  }
+
+  if (q.skipLogic?.length) {
+    html += `<div class="detail-section-title">Skip Logic</div>`;
+    for (const sl of q.skipLogic) {
+      html += `<div class="logic-rule" style="border-left-color:var(--teal);background:var(--teal-lt);"><span class="logic-icon">⤵</span><span>If answer = "<strong>${esc(String(sl.condition?.value||""))}</strong>", skip to <strong>${esc(sl.destination||"EndOfSurvey")}</strong></span></div>`;
+    }
+  }
+
+  if (q.validation?.type && q.validation.type !== "none") {
+    html += `<div class="detail-section-title">Validation</div>
+      <div class="logic-rule" style="border-left-color:var(--blue);background:var(--blue-lt);">
+        <span class="logic-icon">✓</span>
+        <span>Type: <strong>${q.validation.type}</strong>${q.validation.min!=null?` · min: ${q.validation.min}`:""}${q.validation.max!=null?` · max: ${q.validation.max}`:""}</span>
+      </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ── Download ──────────────────────────────────────────────────────
+function initDownload() {
+  document.getElementById("downloadQsfBtn").addEventListener("click", doDownload);
+}
+
+function renderDownload() {
+  const empty   = document.getElementById("dlEmpty");
+  const content = document.getElementById("dlContent");
+
+  if (!appState.survey || !appState.qsf) {
+    empty.classList.remove("hidden"); content.classList.add("hidden"); return;
+  }
+  empty.classList.add("hidden"); content.classList.remove("hidden");
+
+  const s = appState.survey;
+  const allQ = countQ(s);
+  const wDisp = (s.blocks||[]).reduce((n,b)=>n+(b.questions||[]).filter(q=>q.displayLogic?.length).length,0);
+  const wSkip = (s.blocks||[]).reduce((n,b)=>n+(b.questions||[]).filter(q=>q.skipLogic?.length).length,0);
+  const wScor = (s.blocks||[]).reduce((n,b)=>n+(b.questions||[]).filter(q=>q.scoring?.enabled).length,0);
+
+  document.getElementById("dlTitle").textContent = s.surveyTitle || "Untitled Survey";
+  document.getElementById("dlStats").innerHTML = `
+    <div class="stat-box"><div class="stat-n">${s.blocks?.length||0}</div><div class="stat-l">Blocks</div></div>
+    <div class="stat-box"><div class="stat-n">${allQ}</div><div class="stat-l">Questions</div></div>
+    <div class="stat-box"><div class="stat-n">${wDisp+wSkip}</div><div class="stat-l">Logic Rules</div></div>
+    <div class="stat-box"><div class="stat-n">${wScor}</div><div class="stat-l">Scored Qs</div></div>`;
+}
+
+function doDownload() {
+  if (!appState.qsf) return;
+  const json = JSON.stringify(appState.qsf, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  const name = (appState.survey?.surveyTitle || "survey").replace(/[^a-z0-9_-]/gi, "_");
+  a.href = url; a.download = `${name}.qsf`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ── Settings ──────────────────────────────────────────────────────
+function initSettings() {
+  document.getElementById("saveAccountBtn").addEventListener("click", () => {
+    const email = document.getElementById("settingsEmail").value.trim();
+    const name  = document.getElementById("settingsName").value.trim();
+    if (!email) return;
+    appState.user = { email, name: name || email.split("@")[0] };
+    localStorage.setItem("tusk_user", JSON.stringify(appState.user));
+    document.getElementById("topbarEmail").textContent = email;
+    document.getElementById("topbarAvatar").textContent = (name||email)[0].toUpperCase();
+    showAlert("homeAlert", "success", "Account saved."); // reuse alert
+    switchPage("home");
+  });
+
+  document.getElementById("testApiBtn").addEventListener("click", async () => {
+    const key   = document.getElementById("settingsApiKey").value.trim();
+    const model = document.getElementById("settingsModel").value;
+    const statusEl = document.getElementById("apiStatus");
+    appState.apiKey = key;
+    appState.model  = model;
+    localStorage.setItem("tusk_apikey", key);
+    localStorage.setItem("tusk_model", model);
+
+    if (model === "pollinations") {
+      statusEl.className = "api-status ok";
+      statusEl.innerHTML = `<div class="status-dot"></div><span>Pollinations AI — ready (no key needed)</span>`;
+      return;
+    }
+    if (!key) {
+      statusEl.className = "api-status error";
+      statusEl.innerHTML = `<div class="status-dot"></div><span>API key required for Claude</span>`;
+      return;
+    }
+    statusEl.className = "api-status idle";
+    statusEl.innerHTML = `<div class="status-dot"></div><span>Testing…</span>`;
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01" },
+        body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:10, messages:[{role:"user",content:"hi"}] })
+      });
+      if (res.ok) {
+        statusEl.className = "api-status ok";
+        statusEl.innerHTML = `<div class="status-dot"></div><span>✓ Anthropic API connected</span>`;
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    } catch(e) {
+      statusEl.className = "api-status error";
+      statusEl.innerHTML = `<div class="status-dot"></div><span>✕ ${e.message}</span>`;
+    }
+  });
+}
+
+// ── Utilities ─────────────────────────────────────────────────────
+function showProgress(label, pct) {
+  document.getElementById("progressWrap").classList.remove("hidden");
+  document.getElementById("progressLabel").textContent = label;
+  document.getElementById("progressPct").textContent   = pct + "%";
+  document.getElementById("progressFill").style.width  = pct + "%";
+}
+function hideProgress() {
+  document.getElementById("progressWrap").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "0%";
+}
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = `alert alert-${type}`;
+  el.innerHTML = `<span class="alert-icon">${{success:"✓",error:"⚠",info:"ℹ"}[type]||"ℹ"}</span><span>${esc(msg)}</span>`;
+  el.classList.remove("hidden");
+}
+function hideAlert(id) {
+  document.getElementById(id).classList.add("hidden");
+}
+function showOverlay(msg, sub) {
+  document.getElementById("overlayMsg").textContent = msg;
+  document.getElementById("overlaySub").textContent = sub || "";
+  document.getElementById("overlay").classList.add("show");
+}
+function hideOverlay() { document.getElementById("overlay").classList.remove("show"); }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+</script>
+
+</body>
+</html>
