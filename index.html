@@ -1291,24 +1291,37 @@ async function callAI(text) {
 }
 
 async function callAnthropic(userContent) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": appState.apiKey,
-      "anthropic-version": "2023-06-01"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 8000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userContent }]
-    })
-  });
-  if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
+  let res;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": appState.apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 8000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: userContent }]
+      })
+    });
+  } catch (netErr) {
+    throw new Error("Cannot reach Anthropic API — check your internet connection.");
+  }
+  if (res.status === 401) throw new Error("Invalid API key — please check your key in Settings.");
+  if (res.status === 403) throw new Error("API key permission denied. Check your Anthropic account.");
+  if (res.status === 429) throw new Error("Rate limit reached. Please wait a moment and try again.");
+  if (!res.ok) {
+    let detail = "";
+    try { const e = await res.json(); detail = e?.error?.message || ""; } catch(_) {}
+    throw new Error("Anthropic error (" + res.status + ")" + (detail ? ": " + detail : ""));
+  }
   const data = await res.json();
   const raw = data?.content?.[0]?.text || "";
-  if (!raw.trim()) throw new Error("Empty response from Anthropic.");
+  if (!raw.trim()) throw new Error("Empty response from Anthropic. Please try again.");
   return raw;
 }
 
@@ -1589,7 +1602,12 @@ function initSettings() {
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": key,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
         body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:10, messages:[{role:"user",content:"hi"}] })
       });
       if (res.ok) {
